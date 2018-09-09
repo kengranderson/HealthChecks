@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public class CachedHealthCheckTest
     {
-        private readonly FakeServiceProvider _serviceProvider = new FakeServiceProvider();
+        readonly FakeServiceProvider _serviceProvider = new FakeServiceProvider();
 
         [Fact]
         public void GuardClauses()
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.HealthChecks
         public class ExceptionHandling : CachedHealthCheckTest
         {
             [Fact]
-            public async void CheckDoesNotThrow_ReturnsCheckResult()
+            public async Task CheckDoesNotThrow_ReturnsCheckResult()
             {
                 var checkResult = HealthCheckResult.Healthy("Healthy Check");
                 var cachedCheck = new TestableCachedHealthCheck(check: HealthCheck.FromCheck(() => checkResult));
@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void CancellationRequested_ReturnsUnhealthyCheck()
+            public async Task CancellationRequested_ReturnsUnhealthyCheck()
             {
                 var checkResult = HealthCheckResult.Healthy("Happy check");
                 var cachedCheck = new TestableCachedHealthCheck(check: HealthCheck.FromCheck(token => { token.ThrowIfCancellationRequested(); return checkResult; }));
@@ -51,7 +51,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void CheckThrows_ReturnsUnhealthyCheck()
+            public async Task CheckThrows_ReturnsUnhealthyCheck()
             {
                 var cachedCheck = new TestableCachedHealthCheck(check: HealthCheck.FromCheck(() => throw new DivideByZeroException()));
 
@@ -66,7 +66,7 @@ namespace Microsoft.Extensions.HealthChecks
         public class Caching : CachedHealthCheckTest
         {
             [Fact]
-            public async void FirstCallReadsCheck()
+            public async Task FirstCallReadsCheck()
             {
                 var checkResult = Substitute.For<IHealthCheckResult>();
                 var check = Substitute.For<Func<CancellationToken, ValueTask<IHealthCheckResult>>>();
@@ -79,7 +79,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void SecondCallUsesCachedValue()
+            public async Task SecondCallUsesCachedValue()
             {
                 var checkResult1 = Substitute.For<IHealthCheckResult>();
                 var checkResult2 = Substitute.For<IHealthCheckResult>();
@@ -95,7 +95,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void CachedValueRefreshedAfterTimeout()
+            public async Task CachedValueRefreshedAfterTimeout()
             {
                 var checkResult1 = Substitute.For<IHealthCheckResult>();
                 var checkResult2 = Substitute.For<IHealthCheckResult>();
@@ -114,7 +114,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void MultipleCallersDuringRefreshPeriodOnlyResultInASingleValue()
+            public async Task MultipleCallersDuringRefreshPeriodOnlyResultInASingleValue()
             {
                 var checkResult1 = Substitute.For<IHealthCheckResult>();
                 var checkResult2 = Substitute.For<IHealthCheckResult>();
@@ -142,8 +142,8 @@ namespace Microsoft.Extensions.HealthChecks
 
         class TestableCachedHealthCheck : CachedHealthCheck
         {
-            private readonly IHealthCheck _check;
-            private DateTimeOffset _utcNow = DateTimeOffset.UtcNow;
+            readonly IHealthCheck _check;
+            DateTimeOffset _utcNow = DateTimeOffset.UtcNow;
 
             public TestableCachedHealthCheck(string name = "The default check name", TimeSpan cacheDuration = default(TimeSpan), IHealthCheck check = null)
                     : base(name, cacheDuration)

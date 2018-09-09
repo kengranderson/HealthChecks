@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.HealthChecks.Fakes
 {
     class FakeServiceProvider : IServiceProvider
     {
-        private readonly FakeServiceScopeFactory _scopeFactory;
+        readonly FakeServiceScopeFactory _scopeFactory;
 
         public FakeServiceProvider() => _scopeFactory = new FakeServiceScopeFactory(this);
 
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.HealthChecks.Fakes
 
         class FakeServiceScopeFactory : IServiceScopeFactory
         {
-            private readonly IServiceProvider _serviceProvider;
+            readonly IServiceProvider _serviceProvider;
 
             public FakeServiceScopeFactory(IServiceProvider serviceProvider)
                 => _serviceProvider = serviceProvider;
@@ -37,8 +37,8 @@ namespace Microsoft.Extensions.HealthChecks.Fakes
 
         class FakeServiceScope : IServiceScope
         {
-            private readonly List<string> _operations;
-            private readonly IServiceProvider _serviceProvider;
+            readonly List<string> _operations;
+            readonly IServiceProvider _serviceProvider;
 
             public FakeServiceScope(IServiceProvider serviceProvider, List<string> operations)
             {

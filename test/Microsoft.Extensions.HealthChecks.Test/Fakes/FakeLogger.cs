@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.HealthChecks.Fakes
 
         class Disposer : IDisposable
         {
-            private readonly List<string> _operations;
+            readonly List<string> _operations;
 
             public Disposer(List<string> operations)
                 => _operations = operations;

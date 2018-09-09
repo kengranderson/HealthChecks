@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
         public class CheckAsync
         {
             [Fact]
-            public async void CallsHttpClientWithNoCache_ReturnsCheckFunctionResult()
+            public async Task CallsHttpClientWithNoCache_ReturnsCheckFunctionResult()
             {
                 var response = new HttpResponseMessage();
                 var checkResult = HealthCheckResult.Healthy("This is a healthy response");
@@ -41,11 +41,11 @@ namespace Microsoft.Extensions.HealthChecks.Internal
                 Assert.Equal("This is a healthy response", checkResult.Description);
                 Assert.Equal(HttpMethod.Get, response.RequestMessage.Method);
                 Assert.Equal("http://url1/", response.RequestMessage.RequestUri.ToString());
-                Assert.Equal(true, response.RequestMessage.Headers.CacheControl.NoCache);
+                Assert.True(response.RequestMessage.Headers.CacheControl.NoCache);
             }
 
             [Fact]
-            public async void ReturnedDataIncludesUrlWhenExceptionIsThrown()
+            public async Task ReturnedDataIncludesUrlWhenExceptionIsThrown()
             {
                 var exception = new DivideByZeroException();
                 var checker = new TestableUrlChecker(exception, "http://uri/");
@@ -70,7 +70,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             [Theory]
             [InlineData(HttpStatusCode.OK)]         // 200
             [InlineData(HttpStatusCode.NoContent)]  // 204
-            public async void StatusCode2xx_ReturnsHealthy(HttpStatusCode statusCode)
+            public async Task StatusCode2xx_ReturnsHealthy(HttpStatusCode statusCode)
             {
                 response.StatusCode = statusCode;
 
@@ -91,7 +91,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
             [InlineData(HttpStatusCode.Moved)]               // 3xx
             [InlineData(HttpStatusCode.NotFound)]            // 4xx
             [InlineData(HttpStatusCode.ServiceUnavailable)]  // 5xx
-            public async void StatusCodeNon2xx_ReturnsUnhealthy(HttpStatusCode statusCode)
+            public async Task StatusCodeNon2xx_ReturnsUnhealthy(HttpStatusCode statusCode)
             {
                 response.StatusCode = statusCode;
 
@@ -110,7 +110,7 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 
         class TestableUrlChecker : UrlChecker
         {
-            private readonly HttpMessageHandler _handler;
+            readonly HttpMessageHandler _handler;
 
             // URL and response
             public TestableUrlChecker(Func<HttpResponseMessage, ValueTask<IHealthCheckResult>> checkFunc,
@@ -132,20 +132,18 @@ namespace Microsoft.Extensions.HealthChecks.Internal
 
             class ExceptionHandler : HttpMessageHandler
             {
-                private readonly Exception _exceptionToThrow;
+                readonly Exception _exceptionToThrow;
 
-                public ExceptionHandler(Exception exceptionToThrow)
-                    => _exceptionToThrow = exceptionToThrow;
+                public ExceptionHandler(Exception exceptionToThrow) => _exceptionToThrow = exceptionToThrow;
 
-                protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-                    => throw _exceptionToThrow;
+                protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) => throw _exceptionToThrow;
             }
 
             class ResponseHandler : HttpMessageHandler
             {
-                private static readonly HttpResponseMessage _defaultResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound };
-                private readonly HttpResponseMessage _response;
-                private readonly string _url;
+                static readonly HttpResponseMessage _defaultResponse = new HttpResponseMessage { StatusCode = HttpStatusCode.NotFound };
+                readonly HttpResponseMessage _response;
+                readonly string _url;
 
                 public ResponseHandler(string url, HttpResponseMessage response)
                 {

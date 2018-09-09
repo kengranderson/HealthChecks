@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.HealthChecks.Fakes;
 using Xunit;
 
@@ -10,8 +11,8 @@ namespace Microsoft.Extensions.HealthChecks.Checks
 {
     public class NumericChecksTest
     {
-        private readonly HealthCheckBuilder _builder = new HealthCheckBuilder();
-        private readonly IServiceProvider _serviceProvider = new FakeServiceProvider();
+        readonly HealthCheckBuilder _builder = new HealthCheckBuilder();
+        readonly IServiceProvider _serviceProvider = new FakeServiceProvider();
 
         public class AddMinValueCheck : NumericChecksTest
         {
@@ -27,7 +28,7 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             [Theory]
             [InlineData(-1, CheckStatus.Unhealthy)]
             [InlineData(1, CheckStatus.Healthy)]
-            public async void RegistersCheck(int monitoredValue, CheckStatus expectedStatus)
+            public async Task RegistersCheck(int monitoredValue, CheckStatus expectedStatus)
             {
                 _builder.AddMinValueCheck("CheckName", 0, () => monitoredValue);
 
@@ -65,7 +66,7 @@ namespace Microsoft.Extensions.HealthChecks.Checks
             [Theory]
             [InlineData(1, CheckStatus.Unhealthy)]
             [InlineData(-1, CheckStatus.Healthy)]
-            public async void RegistersCheck(int monitoredValue, CheckStatus expectedStatus)
+            public async Task RegistersCheck(int monitoredValue, CheckStatus expectedStatus)
             {
                 _builder.AddMaxValueCheck("CheckName", 0, () => monitoredValue);
 

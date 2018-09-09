@@ -11,8 +11,8 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckBuilderTest
     {
-        private readonly HealthCheckBuilder _builder = new HealthCheckBuilder();
-        private readonly FakeServiceProvider _serviceProvider = new FakeServiceProvider();
+        readonly HealthCheckBuilder _builder = new HealthCheckBuilder();
+        readonly FakeServiceProvider _serviceProvider = new FakeServiceProvider();
 
         [Fact]
         public void Defaults()
@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void CheckIsResolvedViaServiceProvider()
+            public async Task CheckIsResolvedViaServiceProvider()
             {
                 _builder.AddCheck<MyCheck>("myCheck", TimeSpan.FromMinutes(1));
                 var cachedCheck = _builder.ChecksByName["myCheck"];
@@ -81,7 +81,7 @@ namespace Microsoft.Extensions.HealthChecks
 
         public class AddCheck_Check : HealthCheckBuilderTest
         {
-            private readonly MyCheck _myCheck = new MyCheck();
+            readonly MyCheck _myCheck = new MyCheck();
 
             [Fact]
             public void GuardClauses()
@@ -116,7 +116,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void CheckIsUsedDirectlyWithoutServiceProviderResolution()
+            public async Task CheckIsUsedDirectlyWithoutServiceProviderResolution()
             {
                 _builder.AddCheck("myCheck", _myCheck, TimeSpan.FromMinutes(1));
                 var cachedCheck = _builder.ChecksByName["myCheck"];

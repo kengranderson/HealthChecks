@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.HealthChecks.Fakes;
 using Xunit;
 
@@ -10,13 +11,13 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public class HealthCheckServiceTest
     {
-        private readonly HealthCheckBuilder _builder = new HealthCheckBuilder();
-        private readonly FakeServiceProvider _serviceProvider = new FakeServiceProvider();
+        readonly HealthCheckBuilder _builder = new HealthCheckBuilder();
+        readonly FakeServiceProvider _serviceProvider = new FakeServiceProvider();
 
         public class CheckHealthAsync : HealthCheckServiceTest
         {
             [Fact]
-            public async void NoChecks_ReturnsUnknownStatus()
+            public async Task NoChecks_ReturnsUnknownStatus()
             {
                 var service = new HealthCheckService(_builder, _serviceProvider, _serviceProvider.ScopeFactory);
 
@@ -27,7 +28,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void Checks_ReturnsCompositeStatus()
+            public async Task Checks_ReturnsCompositeStatus()
             {
                 _builder.WithPartialSuccessStatus(CheckStatus.Warning)
                         .AddCheck("c1", () => HealthCheckResult.Healthy("Healthy check"))
@@ -44,7 +45,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void RunsScoped()
+            public async Task RunsScoped()
             {
                 var service = new HealthCheckService(_builder, _serviceProvider, _serviceProvider.ScopeFactory);
 
@@ -57,7 +58,7 @@ namespace Microsoft.Extensions.HealthChecks
             }
 
             [Fact]
-            public async void GroupsIntegrationTest()
+            public async Task GroupsIntegrationTest()
             {
                 _builder.WithPartialSuccessStatus(CheckStatus.Warning)
                         .AddCheck("c1", () => HealthCheckResult.Healthy("Healthy c1"))
@@ -78,10 +79,10 @@ namespace Microsoft.Extensions.HealthChecks
             }
         }
 
-        private static string ToDescriptiveString(IHealthCheckResult result)
+        static string ToDescriptiveString(IHealthCheckResult result)
             => $"{result.CheckStatus} ({result.Description})";
 
-        private static string ToDescriptiveString(KeyValuePair<string, IHealthCheckResult> kvp)
+        static string ToDescriptiveString(KeyValuePair<string, IHealthCheckResult> kvp)
             => $"'{kvp.Key}' = '{ToDescriptiveString(kvp.Value)}'";
     }
 }
