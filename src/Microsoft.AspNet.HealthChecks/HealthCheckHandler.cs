@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.HealthChecks
 {
     public class HealthCheckHandler : HttpTaskAsyncHandler
     {
-        private static TimeSpan _timeout = TimeSpan.FromSeconds(10);
+        static TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
         public override bool IsReusable => true;
 

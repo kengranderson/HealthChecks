@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.HealthChecks  // Put this in Extensions so you al
 {
     public static class GlobalHealthChecks
     {
-        private static IHealthCheckService _service;
+        static IHealthCheckService _service;
 
         public static IHealthCheckService Service
         {

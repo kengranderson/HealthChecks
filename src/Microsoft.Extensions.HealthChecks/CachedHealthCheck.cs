@@ -59,7 +59,7 @@ namespace Microsoft.Extensions.HealthChecks
                 }
                 catch (Exception ex)
                 {
-                    CachedResult = HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}");
+                    CachedResult = HealthCheckResult.Unhealthy($"Exception during check: {ex.GetType().FullName}: {ex.Message}");
                 }
 
                 CacheExpiration = UtcNow + CacheDuration;

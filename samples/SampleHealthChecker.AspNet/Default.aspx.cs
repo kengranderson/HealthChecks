@@ -21,7 +21,7 @@ namespace SampleHealthChecker.AspNet
             RegisterAsyncTask(new PageAsyncTask(GetChecksAsync));
         }
 
-        private async Task GetChecksAsync(CancellationToken cancellationToken)
+        async Task GetChecksAsync(CancellationToken cancellationToken)
         {
             var timedTokenSource = new CancellationTokenSource(HealthCheckHandler.Timeout);
             var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timedTokenSource.Token);

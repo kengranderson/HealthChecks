@@ -1,9 +1,13 @@
 // Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using Dapper;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
+using System.Linq;
 
 namespace Microsoft.Extensions.HealthChecks
 {
@@ -11,44 +15,66 @@ namespace Microsoft.Extensions.HealthChecks
 
     public static class HealthCheckBuilderSqlServerExtensions
     {
-        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, string connectionString)
+        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, string connectionString,
+            string procedureName, object parameter)
+        {
+            return AddSqlCheck(builder, name, connectionString, new string[] { procedureName}, new object[] { parameter}, builder.DefaultCacheDuration);
+        }
+
+        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, string connectionString,
+            string[] procedureNames, object[] parameters)
         {
             Guard.ArgumentNotNull(nameof(builder), builder);
 
-            return AddSqlCheck(builder, name, connectionString, builder.DefaultCacheDuration);
+            return AddSqlCheck(builder, name, connectionString, procedureNames, parameters, builder.DefaultCacheDuration);
         }
 
-        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, string connectionString, TimeSpan cacheDuration)
+        public static HealthCheckBuilder AddSqlCheck(this HealthCheckBuilder builder, string name, 
+            string connectionString, string[] procedureNames, object[] parameters, TimeSpan cacheDuration)
         {
             builder.AddCheck($"SqlCheck({name})", async () =>
             {
+                var timer = new Stopwatch();
+                timer.Start();
+
                 try
                 {
                     //TODO: There is probably a much better way to do this.
-                    using (var connection = new SqlConnection(connectionString))
+                    using (var db = new SqlConnection(connectionString))
                     {
-                        connection.Open();
-                        using (var command = connection.CreateCommand())
-                        {
-                            command.CommandType = CommandType.Text;
-                            command.CommandText = "SELECT 1";
-                            var result = (int)await command.ExecuteScalarAsync().ConfigureAwait(false);
-                            if (result == 1)
-                            {
-                                return HealthCheckResult.Healthy($"SqlCheck({name}): Healthy");
-                            }
+                        bool success = true;
 
-                            return HealthCheckResult.Unhealthy($"SqlCheck({name}): Unhealthy");
+                        for (int index = 0; index < procedureNames.Length && success; index++) {
+                            string procedureName = procedureNames[index];
+                            object parms = parameters[index];
+
+                            var queryResult = await db.QueryAsync(procedureName, parms, commandType: CommandType.StoredProcedure);
+                            success &= queryResult.Count() > 0;
                         }
+
+                        if (success) {
+                            return HealthCheckResult.Healthy($"SqlCheck({name}): Healthy", TimerInfo(timer));
+                        }
+                        return HealthCheckResult.Unhealthy($"SqlCheck({name}): Unhealthy", TimerInfo(timer));
                     }
                 }
                 catch (Exception ex)
                 {
-                    return HealthCheckResult.Unhealthy($"SqlCheck({name}): Exception during check: {ex.GetType().FullName}");
+                    return HealthCheckResult.Unhealthy($"SqlCheck({name}): Exception during check: {ex.GetType().FullName}", TimerInfo(timer));
                 }
             }, cacheDuration);
 
             return builder;
+        }
+
+        static Dictionary<string, object> TimerInfo(Stopwatch timer) {
+            timer.Stop();
+
+            var details = new Dictionary<string, object> {
+                { "Elapsed", timer.ElapsedMilliseconds }
+            };
+
+            return details;
         }
     }
 }
