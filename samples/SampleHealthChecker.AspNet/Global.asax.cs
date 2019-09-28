@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Configuration;
 using System.Threading.Tasks;
 using Microsoft.AspNet.HealthChecks;
 using Microsoft.Extensions.HealthChecks;
@@ -14,23 +15,24 @@ namespace SampleHealthChecker.AspNet
         {
             HealthCheckHandler.Timeout = TimeSpan.FromSeconds(3);
 
+            string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
             GlobalHealthChecks.Build(builder =>
                 builder.WithDefaultCacheDuration(TimeSpan.FromMinutes(1))
-                       .AddSqlCheck("SqlHealthCheck", "DefaultConnection", "Diagnostics.HealthCheck", null)
-                       //.AddUrlCheck("https://github.com")
-                       //.AddHealthCheckGroup(
-                       //    "servers",
-                       //    group => group.AddUrlCheck("https://google.com")
-                       //                  .AddUrlCheck("https://twitddter.com")
-                       //)
-                       //.AddHealthCheckGroup(
-                       //    "memory",
-                       //    group => group.AddPrivateMemorySizeCheck(1)
-                       //                  .AddVirtualMemorySizeCheck(2)
-                       //                  .AddWorkingSetCheck(1)
-                       //)
-                       ////.AddCheck("thrower", (Func<IHealthCheckResult>)(() => { throw new DivideByZeroException(); }))
-                       //.AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); })
+                       .AddSqlCheck("SqlHealthCheck", connectionString, "Diagnostics.HealthCheck", null)
+                       .AddUrlCheck("https://github.com")
+                       .AddHealthCheckGroup(
+                           "servers",
+                           group => group.AddUrlCheck("https://google.com")
+                                         .AddUrlCheck("https://twitddter.com")
+                       )
+                       .AddHealthCheckGroup(
+                           "memory",
+                           group => group.AddPrivateMemorySizeCheck(1)
+                                         .AddVirtualMemorySizeCheck(2)
+                                         .AddWorkingSetCheck(1)
+                       )
+                       //.AddCheck("thrower", (Func<IHealthCheckResult>)(() => { throw new DivideByZeroException(); }))
+                       .AddCheck("long-running", async cancellationToken => { await Task.Delay(10000, cancellationToken); return HealthCheckResult.Healthy("I ran too long"); })
             );
         }
     }

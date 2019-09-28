@@ -12,10 +12,10 @@ namespace Microsoft.Extensions.HealthChecks
     /// </summary>
     public class CompositeHealthCheckResult : IHealthCheckResult
     {
-        private static readonly IReadOnlyDictionary<string, object> _emptyData = new Dictionary<string, object>();
-        private readonly CheckStatus _initialStatus;
-        private readonly CheckStatus _partiallyHealthyStatus;
-        private readonly Dictionary<string, IHealthCheckResult> _results = new Dictionary<string, IHealthCheckResult>(StringComparer.OrdinalIgnoreCase);
+        static readonly IReadOnlyDictionary<string, object> _emptyData = new Dictionary<string, object>();
+        readonly CheckStatus _initialStatus;
+        readonly CheckStatus _partiallyHealthyStatus;
+        readonly Dictionary<string, IHealthCheckResult> _results = new Dictionary<string, IHealthCheckResult>(StringComparer.OrdinalIgnoreCase);
 
         public CompositeHealthCheckResult(CheckStatus partiallyHealthyStatus = CheckStatus.Warning,
                                           CheckStatus initialStatus = CheckStatus.Unknown)
@@ -46,6 +46,11 @@ namespace Microsoft.Extensions.HealthChecks
             }
         }
 
+        public long? Duration
+        {
+            get => _results.Values.Select(r => r.Duration).Sum();
+        }
+
         public string Description => string.Join(Environment.NewLine, _results.Select(r => $"{r.Key}: {r.Value.Description}"));
 
         public IReadOnlyDictionary<string, object> Data
@@ -67,12 +72,15 @@ namespace Microsoft.Extensions.HealthChecks
             => Add(name, status, description, null);
 
         public void Add(string name, CheckStatus status, string description, Dictionary<string, object> data)
+            => Add(name, status, description, data, null);
+
+        public void Add(string name, CheckStatus status, string description, Dictionary<string, object> data, long? duration)
         {
             Guard.ArgumentNotNullOrEmpty(nameof(name), name);
             Guard.ArgumentValid(status != CheckStatus.Unknown, nameof(status), "Cannot add 'Unknown' status to composite health check result.");
             Guard.ArgumentNotNullOrEmpty(nameof(description), description);
 
-            _results.Add(name, HealthCheckResult.FromStatus(status, description, data));
+            _results.Add(name, HealthCheckResult.FromStatus(status, description, data, duration));
         }
 
         public void Add(string name, IHealthCheckResult checkResult)

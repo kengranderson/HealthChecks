@@ -3,7 +3,6 @@
 
 using Dapper;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -52,29 +51,21 @@ namespace Microsoft.Extensions.HealthChecks
                             success &= queryResult.Count() > 0;
                         }
 
+                        timer.Stop();
+
                         if (success) {
-                            return HealthCheckResult.Healthy($"SqlCheck({name}): Healthy", TimerInfo(timer));
+                            return HealthCheckResult.Healthy($"SqlCheck({name}): Healthy", null, timer.ElapsedMilliseconds);
                         }
-                        return HealthCheckResult.Unhealthy($"SqlCheck({name}): Unhealthy", TimerInfo(timer));
+                        return HealthCheckResult.Unhealthy($"SqlCheck({name}): Unhealthy", null, timer.ElapsedMilliseconds);
                     }
                 }
                 catch (Exception ex)
                 {
-                    return HealthCheckResult.Unhealthy($"SqlCheck({name}): Exception during check: {ex.GetType().FullName}", TimerInfo(timer));
+                    return HealthCheckResult.Unhealthy($"SqlCheck({name}): Exception during check: {ex.GetType().FullName}", null, timer.ElapsedMilliseconds);
                 }
             }, cacheDuration);
 
             return builder;
-        }
-
-        static Dictionary<string, object> TimerInfo(Stopwatch timer) {
-            timer.Stop();
-
-            var details = new Dictionary<string, object> {
-                { "Elapsed", timer.ElapsedMilliseconds }
-            };
-
-            return details;
         }
     }
 }

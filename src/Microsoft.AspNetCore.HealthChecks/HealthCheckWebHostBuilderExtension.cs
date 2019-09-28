@@ -37,7 +37,7 @@ namespace Microsoft.AspNetCore.Hosting
             Guard.ArgumentNotNull(nameof(path), path);
             // REVIEW: Is there a better URL path validator somewhere?
             Guard.ArgumentValid(!path.Contains("?"), nameof(path), "Path cannot contain query string values.");
-            Guard.ArgumentValid(path.StartsWith("/"), nameof(path), "Path should start with '/'.");
+            Guard.ArgumentValid(path.StartsWith("/", StringComparison.Ordinal), nameof(path), "Path should start with '/'.");
             Guard.ArgumentValid(timeout > TimeSpan.Zero, nameof(timeout), "Health check timeout must be a positive time span.");
 
             builder.ConfigureServices(services => services.AddSingleton<IStartupFilter>(new HealthCheckStartupFilter(path, timeout)));

@@ -13,11 +13,11 @@ namespace Microsoft.AspNetCore.HealthChecks
 {
     public class HealthCheckMiddleware
     {
-        private readonly RequestDelegate _next;
-        private readonly string _path;
-        private readonly int? _port;
-        private readonly IHealthCheckService _service;
-        private readonly TimeSpan _timeout;
+        readonly RequestDelegate _next;
+        readonly string _path;
+        readonly int? _port;
+        readonly IHealthCheckService _service;
+        readonly TimeSpan _timeout;
 
         public HealthCheckMiddleware(RequestDelegate next, IHealthCheckService service, int port, TimeSpan timeout)
         {
@@ -50,13 +50,10 @@ namespace Microsoft.AspNetCore.HealthChecks
                 await context.Response.WriteAsync(JsonConvert.SerializeObject(new { status = status.ToString() }));
                 return;
             }
-            else
-            {
-                await _next.Invoke(context);
-            }
+            await _next.Invoke(context);
         }
 
-        private bool IsHealthCheckRequest(HttpContext context)
+        bool IsHealthCheckRequest(HttpContext context)
         {
             if (_port.HasValue)
             {

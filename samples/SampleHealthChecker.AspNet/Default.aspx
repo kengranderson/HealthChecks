@@ -18,11 +18,24 @@
 
         <table class="table">
             <thead>
-                <tr><td>Name</td><td>Status</td><td>Description</td>
+                <tr><td>Name</td><td>Status</td><td>Description</td><td>Details</td></tr>
             </thead>
             <tbody>
                 <% foreach (var kvp in CheckResult.Results) { %>
-                    <tr><td><%: kvp.Key %></td><td><%: kvp.Value.CheckStatus %></td><td><pre><%: kvp.Value.Description %></pre></td></tr>
+                    <tr>
+                        <td><%: kvp.Key %></td>
+                        <td><%: kvp.Value.CheckStatus %></td>
+                        <td><pre><%: kvp.Value.Description %></pre></td>
+                        <td><% if (kvp.Value.Data != null) {
+                                    %>
+                            <table class="table table-condensed">
+                                <% foreach (var dataKvp in kvp.Value.Data) { %> 
+                                <tr><td><%: dataKvp.Key %></td><td><%: dataKvp.Value %></td></tr>
+                                <% } %>
+                            </table>
+                            <%
+                                } %></td>
+                    </tr>
                 <% } %>
             </tbody>
         </table>

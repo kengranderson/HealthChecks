@@ -11,9 +11,9 @@ namespace Microsoft.Extensions.HealthChecks
 {
     public abstract class CachedHealthCheck
     {
-        private static readonly TypeInfo HealthCheckTypeInfo = typeof(IHealthCheck).GetTypeInfo();
+        static readonly TypeInfo HealthCheckTypeInfo = typeof(IHealthCheck).GetTypeInfo();
 
-        private volatile int _writerCount;
+        volatile int _writerCount;
 
         public CachedHealthCheck(string name, TimeSpan cacheDuration)
         {

@@ -8,6 +8,7 @@ namespace Microsoft.Extensions.HealthChecks
     public interface IHealthCheckResult
     {
         CheckStatus CheckStatus { get; }
+        long? Duration { get; }
         string Description { get; }
         IReadOnlyDictionary<string, object> Data { get; }
     }
